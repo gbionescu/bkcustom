@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -eu
+
+# Check if a custom repository is defined
+# If not, just use the default buildkite checkout logic
+CUSTOM_REPO=${USR_REPO:-DEFAULT}
+
+# Cleanup the folder
+rm -rf ./*
+if [ -d ".git" ]; then
+	rm -rf .git
+fi
+
+# Initialize the folder as a git repo
+git init
+
+if [ "$CUSTOM_REPO" = "DEFAULT" ]; then
+	echo "Running default checkout params"
+	git remote add origin "$BUILDKITE_REPO"
+	git fetch origin
+
+	git clean -ffxdq
+	git checkout -f "$BUILDKITE_COMMIT"
+	git clean -ffxdq
+else
+	echo "Running custom checkout params"
+	git remote add origin "$USR_REPO"
+	git fetch origin
+
+	git clean -ffxdq
+	git checkout -f "$USR_CHECKOUT"
+	git clean -ffxdq
+fi
